@@ -1,8 +1,6 @@
 https://big.oisd.nl
-https://raw.githubusercontent.com/badmojr/1Hosts/refs/heads/master/Xtra/domains.txt
+https://raw.githubusercontent.com/badmojr/1Hosts/refs/heads/master/Lite/adblock.txt
 https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareDomains.txt
-https://hblock.molinero.dev/hosts
-https://anti-ad.net/adguard.txt
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/domains/ultimate.txt
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/domains/tif.txt
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/ips/tif.txt
@@ -12,4 +10,3 @@ https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/dyndns-onlydom
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/wildcard/hoster-onlydomains.txt
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/gambling.txt
 https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/nsfw.txt
-https://badblock.celenity.dev/wildcards-no-star/badblock.txt
