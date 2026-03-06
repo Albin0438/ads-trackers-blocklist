@@ -37,6 +37,15 @@ jobs:
           grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/cleaned.txt \
           | sort -u > build/extracted_domains.txt
 
+      - name: Apply allowlist
+        run: |
+          mkdir -p build
+          if [ -f allowlist/allow.txt ]; then
+            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt
+          else
+            cp build/extracted_domains.txt build/filtered_domains.txt
+          fi
+
       - name: Combine with local lists
         run: |
           if [ -d blocklists ]; then
