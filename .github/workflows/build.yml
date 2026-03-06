@@ -14,13 +14,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install tools
-        run: sudo apt-get install -y curl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl grep coreutils
+
+      - name: Create build folders
+        run: |
+          mkdir -p build
+          mkdir -p output
 
       - name: Download sources
         run: |
-          mkdir -p build
           while read url; do
+            echo "Downloading $url"
             curl -L "$url" >> build/raw_filters.txt
+            echo "" >> build/raw_filters.txt
           done < sources/sources.txt
 
       - name: Extract domains
@@ -28,16 +36,18 @@ jobs:
           grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/raw_filters.txt \
           | sort -u > build/extracted_domains.txt
 
-      - name: Combine with local lists
+      - name: Combine with local blocklists
         run: |
-          mkdir -p output
-          cat build/extracted_domains.txt blocklists/*.txt \
+          cat build/extracted_domains.txt blocklists/*.txt 2>/dev/null \
           | sort -u > output/combined.txt
 
-      - name: Commit changes
+      - name: Commit and push
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+
           git add output/combined.txt
-          git commit -m "Update blocklist" || echo "No changes"
+
+          git commit -m "Auto update blocklist" || echo "No changes"
+
           git push
