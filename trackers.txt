@@ -1,3 +1,0 @@
-google-analytics.com
-analytics.twitter.com
-pixel.facebook.com
