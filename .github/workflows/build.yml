@@ -10,18 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Combine lists
+      - name: Install tools
+        run: sudo apt-get install -y curl
+
+      - name: Download sources
+        run: |
+          mkdir -p build
+          while read url; do
+            curl -L "$url" >> build/raw_filters.txt
+          done < sources/sources.txt
+
+      - name: Extract domains
+        run: |
+          grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/raw_filters.txt \
+          | sort -u > build/extracted_domains.txt
+
+      - name: Combine with local lists
         run: |
           mkdir -p output
-          cat blocklists/*.txt | sort -u > output/combined.txt
+          cat build/extracted_domains.txt blocklists/*.txt \
+          | sort -u > output/combined.txt
 
-      - name: Commit updated list
+      - name: Commit changes
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add output/combined.txt
-          git commit -m "Update combined blocklist" || echo "No changes"
+          git commit -m "Update blocklist" || echo "No changes"
           git push
