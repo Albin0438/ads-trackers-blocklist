@@ -1,3 +1,5 @@
 https://big.oisd.nl
-https://anti-ad.net/adguard.txt
+https://raw.githubusercontent.com/badmojr/1Hosts/master/Lite/adblock.txt
 https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareDomains.txt
+https://hblock.molinero.dev/hosts
+https://anti-ad.net/adguard.txt
