@@ -1,2 +1,0 @@
-https://easylist.to/easylist/easylist.txt
-https://filters.adtidy.org/extension/ublock/filters/2.txt
