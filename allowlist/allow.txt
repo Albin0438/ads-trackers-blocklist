@@ -1,1 +1,2 @@
-
+# https://github.com/Albin0438/ads-trackers-blocklist/issues/1
+github.com
