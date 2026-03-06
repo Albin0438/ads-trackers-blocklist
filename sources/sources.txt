@@ -1,2 +1,3 @@
-https://easylist.to/easylist/easylist.txt
-https://filters.adtidy.org/extension/ublock/filters/2.txt
+https://big.oisd.nl
+https://anti-ad.net/adguard.txt
+https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareDomains.txt
