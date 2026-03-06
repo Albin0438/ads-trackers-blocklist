@@ -39,7 +39,6 @@ jobs:
 
       - name: Apply allowlist
         run: |
-          mkdir -p build
           if [ -f allowlist/allow.txt ]; then
             grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt
           else
@@ -49,10 +48,10 @@ jobs:
       - name: Combine with local lists
         run: |
           if [ -d blocklists ]; then
-            cat build/extracted_domains.txt blocklists/*.txt 2>/dev/null \
+            cat build/filtered_domains.txt blocklists/*.txt 2>/dev/null \
             | sort -u > output/combined.txt
           else
-            cp build/extracted_domains.txt output/combined.txt
+            cp build/filtered_domains.txt output/combined.txt
           fi
 
       - name: Commit changes
