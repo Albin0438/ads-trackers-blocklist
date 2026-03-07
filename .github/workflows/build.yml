@@ -40,7 +40,7 @@ jobs:
       - name: Apply allowlist
         run: |
           if [ -f allowlist/allow.txt ]; then
-            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt
+            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt  ||  true
           else
             cp build/extracted_domains.txt build/filtered_domains.txt
           fi
