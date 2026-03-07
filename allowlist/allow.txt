@@ -1,2 +1,8 @@
 # https://github.com/Albin0438/ads-trackers-blocklist/issues/1
 github.com
+
+# https://github.com/Albin0438/ads-trackers-blocklist/issues/3
+dns.nextdns.io
+
+# https://github.com/Albin0438/ads-trackers-blocklist/issues/2
+www.mozilla.org
