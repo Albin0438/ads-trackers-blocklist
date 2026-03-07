@@ -20,13 +20,13 @@ jobs:
         run: |
           mkdir -p build
           mkdir -p output
-          touch build/raw_filters.txt # Ensure file exists for the loop
+          touch build/raw_filters.txt
 
       - name: Download sources
         run: |
-          # The -r and [ -n ] check handles files that don't end in a newline
+          # Clean sources.txt of Windows line endings (\r) and read URLs
+          sed -i 's/\r//' sources/sources.txt
           while read -r url || [ -n "$url" ]; do
-            # Skip empty lines or comments in sources.txt
             [[ -z "$url" || "$url" =~ ^# ]] && continue
             echo "Downloading $url"
             curl -sSL "$url" >> build/raw_filters.txt || echo "Failed: $url"
@@ -34,31 +34,43 @@ jobs:
 
       - name: Extract domains
         run: |
-          # If raw_filters is empty, create an empty extracted file
           if [ -s build/raw_filters.txt ]; then
+            # More robust regex to capture domains from various list formats
             grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/raw_filters.txt \
+            | tr '[:upper:]' '[:lower:]' \
             | sort -u > build/extracted_domains.txt
           else
-            touch build/extracted_domains.txt
+            echo "::error::No data downloaded. Check sources.txt"
+            exit 1
           fi
 
       - name: Apply allowlist
         run: |
-          # -s checks if file exists AND is not empty
-          if [ -s allowlist/allow.txt ] && [ -s build/extracted_domains.txt ]; then
-            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt || true
+          # 1. Check if allowlist exists and has content
+          if [ -s allowlist/allow.txt ]; then
+            # 2. CLEAN the allowlist: remove comments, empty lines, and carriage returns
+            # This prevents a single blank line from nuking your whole list.
+            sed 's/\r//' allowlist/allow.txt | grep -vE '^\s*$|^\s*#' | sort -u > build/clean_allow.txt || true
+            
+            # 3. Only filter if the cleaned allowlist actually contains patterns
+            if [ -s build/clean_allow.txt ]; then
+              grep -v -F -x -f build/clean_allow.txt build/extracted_domains.txt > build/filtered_domains.txt || true
+            else
+              cp build/extracted_domains.txt build/filtered_domains.txt
+            fi
           else
-            # If no allowlist or no domains to filter, just copy the file
             cp build/extracted_domains.txt build/filtered_domains.txt
           fi
 
       - name: Combine with personal blocklist
         run: |
-          # Check if the blocklists directory has any .txt files
+          # Ensure filtered_domains.txt exists (even if empty) to prevent cat error
+          touch build/filtered_domains.txt
+          
           if [ -d blocklists ] && ls blocklists/*.txt >/dev/null 2>&1; then
-            cat build/filtered_domains.txt blocklists/*.txt | sort -u > output/combined.txt
+            cat build/filtered_domains.txt blocklists/*.txt | sed 's/\r//' | grep -vE '^\s*$|^\s*#' | sort -u > output/combined.txt
           else
-            cp build/filtered_domains.txt output/combined.txt
+            cat build/filtered_domains.txt | sort -u > output/combined.txt
           fi
 
       - name: Commit changes
@@ -66,16 +78,15 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           
-          # Only proceed if the output file actually has content
           if [ -s output/combined.txt ]; then
             git add output/combined.txt
             if git diff --cached --quiet; then
-              echo "No changes to commit"
+              echo "No changes"
             else
               git commit -m "Auto update blocklist"
               git push
             fi
           else
-            echo "Error: combined.txt is empty. Skipping commit."
+            echo "Final file is empty. Check logs for extraction errors."
             exit 1
           fi
