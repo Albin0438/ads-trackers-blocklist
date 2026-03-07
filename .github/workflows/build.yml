@@ -20,36 +20,43 @@ jobs:
         run: |
           mkdir -p build
           mkdir -p output
+          touch build/raw_filters.txt # Ensure file exists for the loop
 
       - name: Download sources
         run: |
-          while read url; do
+          # The -r and [ -n ] check handles files that don't end in a newline
+          while read -r url || [ -n "$url" ]; do
+            # Skip empty lines or comments in sources.txt
+            [[ -z "$url" || "$url" =~ ^# ]] && continue
             echo "Downloading $url"
-            curl -L "$url" >> build/raw_filters.txt
+            curl -sSL "$url" >> build/raw_filters.txt || echo "Failed: $url"
           done < sources/sources.txt
-
-      - name: Remove comments and empty lines
-        run: |
-          grep -vE '^\s*$|^\s*#' build/raw_filters.txt > build/cleaned.txt
 
       - name: Extract domains
         run: |
-          grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/cleaned.txt \
-          | sort -u > build/extracted_domains.txt
+          # If raw_filters is empty, create an empty extracted file
+          if [ -s build/raw_filters.txt ]; then
+            grep -oE '([a-zA-Z0-9_-]+\.)+[a-zA-Z]{2,}' build/raw_filters.txt \
+            | sort -u > build/extracted_domains.txt
+          else
+            touch build/extracted_domains.txt
+          fi
 
       - name: Apply allowlist
         run: |
-          if [ -f allowlist/allow.txt ]; then
-            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt  ||  true
+          # -s checks if file exists AND is not empty
+          if [ -s allowlist/allow.txt ] && [ -s build/extracted_domains.txt ]; then
+            grep -v -F -f allowlist/allow.txt build/extracted_domains.txt > build/filtered_domains.txt || true
           else
+            # If no allowlist or no domains to filter, just copy the file
             cp build/extracted_domains.txt build/filtered_domains.txt
           fi
 
       - name: Combine with personal blocklist
         run: |
-          if [ -d blocklists ]; then
-            cat build/filtered_domains.txt blocklists/*.txt 2>/dev/null \
-            | sort -u > output/combined.txt
+          # Check if the blocklists directory has any .txt files
+          if [ -d blocklists ] && ls blocklists/*.txt >/dev/null 2>&1; then
+            cat build/filtered_domains.txt blocklists/*.txt | sort -u > output/combined.txt
           else
             cp build/filtered_domains.txt output/combined.txt
           fi
@@ -58,11 +65,17 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          git add output/combined.txt
-
-          if git diff --cached --quiet; then
-            echo "No changes"
+          
+          # Only proceed if the output file actually has content
+          if [ -s output/combined.txt ]; then
+            git add output/combined.txt
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
+            else
+              git commit -m "Auto update blocklist"
+              git push
+            fi
           else
-            git commit -m "Auto update blocklist"
-            git push
+            echo "Error: combined.txt is empty. Skipping commit."
+            exit 1
           fi
