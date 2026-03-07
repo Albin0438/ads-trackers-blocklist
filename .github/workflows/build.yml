@@ -45,7 +45,7 @@ jobs:
             cp build/extracted_domains.txt build/filtered_domains.txt
           fi
 
-      - name: Combine with local lists
+      - name: Combine with personal blocklist
         run: |
           if [ -d blocklists ]; then
             cat build/filtered_domains.txt blocklists/*.txt 2>/dev/null \
@@ -63,6 +63,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Daily blocklist update"
+            git commit -m "Auto update blocklist"
             git push
           fi
