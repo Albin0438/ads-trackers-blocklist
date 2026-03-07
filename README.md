@@ -1,11 +1,13 @@
 # ads-trackers-blocklist
-A curated domain blocklist targeting advertising and tracking services for DNS and content blockers. A blocklist that for someone who serious about their privacy and wants to block most bloats on the internet.
+A curated domain blocklist targeting advertising and tracking services for DNS and content blockers.
 
-Somewhat the list is very <b>aggressive!</b> and <b>huge at size</b>. Use at your own risk.
+A blocklist for people who are serious about their privacy and want to block most internet bloat.
 
-Am compiled many well known and well maintained reputed blocklists in the community for getting maximum possible protections.
+This list is quite <b>aggressive</b> and <b>large in size</b>. Use at your own risk.
 
-Sources used are:
+This list compiles several well-known and well-maintained blocklists from the community to provide maximum possible protection.
+
+Sources used:
 
 <ol>
   <li>1Hosts Lite</li>
@@ -20,4 +22,3 @@ Sources used are:
   <li>Hagezi Gambling Full</li>
 </ol>
 
-Hope everything works fine! Please report if anything unexpected occurs via github issues.
